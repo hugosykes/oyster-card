@@ -22,9 +22,9 @@ describe OysterCard do
   describe "#deduct" do
     it 'should deduct money from the card' do
       ded = rand(100)
-      balance = subject.balance
+      initial_balance = subject.balance
       subject.deduct(ded)
-      expect(subject.balance).to eq balance-ded
+      expect(subject.balance).to eq (initial_balance-ded)
     end
   end
 end
