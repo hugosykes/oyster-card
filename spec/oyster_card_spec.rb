@@ -13,7 +13,7 @@ describe OysterCard do
       expect { subject.top_up(val) }.to change { subject.balance }.by(val)
     end
 
-    it "shouldn't let an oyster card top up more than 90" do
+    it "shouldn't let an oyster card top up more than #{OysterCard::MAXIMUM_BALANCE}" do
       expect { subject.top_up(OysterCard::MAXIMUM_BALANCE + 1) }.to raise_error("This is above maximum balance!")
     end
   end
@@ -24,21 +24,32 @@ describe OysterCard do
         expect(subject.in_journey).to eq false
       end
 
-      let (:subject) do
-        oyster = OysterCard.new
-        oyster.top_up(OysterCard::MINIMUM_CHARGE)
-        oyster
-      end
+      context "balance == minimum charge" do
+        let (:subject) do
+          oyster = OysterCard.new
+          oyster.top_up(OysterCard::MINIMUM_CHARGE)
+          oyster
+        end
 
-      it "should report that it is in a journey when touched in" do
-        subject.touch_in
-        expect(subject.in_journey).to eq true
-      end
+        it "should report that it is in a journey when touched in" do
+          subject.touch_in
+          expect(subject.in_journey).to eq true
+        end
 
-      it "touching in then touching out should report: not in journey" do
-        subject.touch_in
-        subject.touch_out
-        expect(subject.in_journey).to eq false
+        it "touching in then touching out should report: not in journey" do
+          subject.touch_in
+          subject.touch_out
+          expect(subject.in_journey).to eq false
+        end
+
+        it "should raise error if touch_in is called twice without touch_out in between" do
+          subject.touch_in
+          expect { subject.touch_in }.to raise_error "Can't touch in without having touched out!"
+        end
+
+        it "should raise error if touch_out is called when not in journey" do
+          expect { subject.touch_out }.to raise_error "Can't touch out when not touched in!"
+        end
       end
     end
 
@@ -49,6 +60,7 @@ describe OysterCard do
 
       it "should charge for journeys in the touch_out method" do
         subject.top_up(OysterCard::MINIMUM_CHARGE)
+        subject.touch_in
         expect { subject.touch_out }.to change { subject.balance }.by(-OysterCard::MINIMUM_CHARGE)
       end
     end
