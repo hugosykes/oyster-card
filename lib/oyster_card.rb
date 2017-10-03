@@ -1,10 +1,12 @@
 class OysterCard
 
   MAXIMUM_BALANCE = 90
+  MINIMUM_BAL_TO_TRAVEL = 1
   attr_reader :balance
 
   def initialize
     @balance = 0
+    @in_journey = false
   end
 
   def top_up(amount)
@@ -17,4 +19,15 @@ class OysterCard
     @balance -= amount
   end
 
+  def in_journey?
+    @in_journey
+  end
+
+  def touch_in
+    @balance >= MINIMUM_BAL_TO_TRAVEL ? @in_journey = true : raise("You must have more than #{MINIMUM_BAL_TO_TRAVEL} to travel!")
+  end
+
+  def touch_out
+    @in_journey = false
+  end
 end
